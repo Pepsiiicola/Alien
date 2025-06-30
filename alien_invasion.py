@@ -6,6 +6,7 @@ from game_stats import GameStats
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+from button import Button
 
 
 
@@ -32,6 +33,9 @@ class AlienInvasion():
         self.aliens = pygame.sprite.Group()
 
         self._create_fleet()
+
+        # 创建Play按钮
+        self.play_button = Button(self, "Play")
 
     def _create_fleet(self):
         """创建外星人群"""
@@ -168,6 +172,24 @@ class AlienInvasion():
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                self._check_play_button(mouse_pos)
+
+    def _check_play_button(self, mouse_pos):
+        """在玩家单击Play按钮时开始新游戏"""
+        if self.play_button.rect.collidepoint(mouse_pos):
+            # 重置游戏统计信息
+            self.stats.reset_stats()
+            self.stats.game_active = True
+
+            # 清空余下的外星人和子弹
+            self.aliens.empty()
+            self.bullets.empty()
+
+            # 创建一群新的外星人并让飞船居中
+            self._create_fleet()
+            self.ship.center_ship()
                 
 
     def _check_keydown_events(self, event):
@@ -191,14 +213,13 @@ class AlienInvasion():
             self.ship.moving_right = False
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
+            
 
     def _fire_bullet(self):
         """创建新子弹并将其将入编组bullets中"""
         if len(self.bullets) < self.settings.bullet_allowed:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
-
-
 
     
     def _update_screen(self):
@@ -213,6 +234,11 @@ class AlienInvasion():
             bullet.draw_bullet()
 
         self.aliens.draw(self.screen)
+
+        # 如果游戏处于非活动状态, 就绘制Play按钮
+        if not self.stats.game_active:
+            self.play_button.draw_button()
+
 
         # 让最近绘制的屏幕可见
         pygame.display.flip()
