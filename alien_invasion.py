@@ -131,6 +131,10 @@ class AlienInvasion():
             self._create_fleet()
             self.settings.increase_speed()
 
+            # 提高等级
+            self.stats.level += 1
+            self.sb.prep_level()
+
     def _check_aliens_bottom(self):
         """检查是否有外星人到达了屏幕底端"""
         screen_rect = self.screen.get_rect()
@@ -155,8 +159,9 @@ class AlienInvasion():
     def _ship_hit(self):
         """响应飞船被外星人撞到"""
 
-        # 将ships_left减1
+        # 将ships_left减1并更新记分牌
         self.stats.ships_left -= 1
+        self.sb.prep_ships()
         if self.stats.ships_left > 0:
             """这条代码我觉得有问题"""
             # self.stats.ships_left -= 1
@@ -200,6 +205,8 @@ class AlienInvasion():
             self.stats.reset_stats()
             self.stats.game_active = True
             self.sb.prep_score()
+            self.sb.prep_level()
+            self.sb.prep_ships()
 
             # 清空余下的外星人和子弹
             self.aliens.empty()
